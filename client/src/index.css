@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Tokens from Design System "Login Screen" */
+  --color-primary: #1f3965;
+  --color-primary-hover: #162a4a;
+  
+  --color-background: #f4f6f8;
+  --color-surface: #ffffff;
+  --color-text-main: #111827;
+  --color-text-muted: #6b7280;
+  
+  --color-border: #e2e8f0;
+  
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+
+  --radius-md: 8px; /* ROUND_EIGHT */
+  --radius-sm: 4px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --font-family: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+}
