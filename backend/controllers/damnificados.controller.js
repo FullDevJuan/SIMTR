@@ -31,10 +31,21 @@ export const createDamnificado = async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
   
+  // Limpiamos los datos para no enviar strings vacíos que rompan PostgreSQL y asignamos default a activo
+  const payload = {
+    numero_documento, tipo_documento, nombres, apellidos, genero, 
+    barrio_afectado, estado_actual, total_miembros, 
+    activo: activo !== undefined ? activo : true,
+    registrado_por
+  };
+  
+  if (fecha_nacimiento) payload.fecha_nacimiento = fecha_nacimiento;
+  if (telefono) payload.telefono = telefono;
+
   try {
     const { data, error } = await supabase
       .from('damnificados')
-      .insert([{ numero_documento, tipo_documento, nombres, apellidos, fecha_nacimiento, genero, telefono, barrio_afectado, estado_actual, total_miembros, activo, registrado_por }])
+      .insert([payload])
       .select();
     if (error) throw error;
     
@@ -54,8 +65,12 @@ export const createDamnificado = async (req, res) => {
 
 export const updateDamnificado = async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
-  
+  const updates = { ...req.body };
+
+  // Limpiar vacíos para evitar errores de tipo en la base de datos
+  if (updates.fecha_nacimiento === '') updates.fecha_nacimiento = null;
+  if (updates.telefono === '') updates.telefono = null;
+
   try {
     const { data, error } = await supabase
       .from('damnificados')

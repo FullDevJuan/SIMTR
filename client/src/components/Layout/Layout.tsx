@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
-import { Home, Users, LogOut } from 'lucide-react';
+import { Home, Users, LogOut, MapPin, Settings } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './Layout.module.css';
 
@@ -37,6 +37,27 @@ export const Layout: React.FC = () => {
             <Users size={20} />
             Damnificados
           </NavLink>
+          <NavLink
+            to="/albergues"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+            }
+          >
+            <MapPin size={20} />
+            Albergues
+          </NavLink>
+          
+          {user?.rol === 'ADMIN' && (
+            <NavLink
+              to="/configuracion/usuarios"
+              className={({ isActive }) =>
+                `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+              }
+            >
+              <Settings size={20} />
+              Configuración
+            </NavLink>
+          )}
         </nav>
       </aside>
       

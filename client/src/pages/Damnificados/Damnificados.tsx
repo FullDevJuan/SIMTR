@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api/client";
 import type { Damnificado } from "../../types";
 import { Table } from "../../components/Table/Table";
@@ -8,6 +9,7 @@ import styles from "./Damnificados.module.css";
 export const Damnificados: React.FC = () => {
   const [damnificados, setDamnificados] = useState<Damnificado[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -51,13 +53,40 @@ export const Damnificados: React.FC = () => {
         </span>
       ),
     },
+    {
+      key: "acciones",
+      header: "Acciones",
+      render: (r: Damnificado) => (
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/damnificados/${r.id}`)}
+          >
+            Ver
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/damnificados/${r.id}/editar`)}
+          >
+            Editar
+          </Button>
+        </div>
+      ),
+    },
   ];
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Registro de Damnificados</h1>
-        <Button onClick={fetchData}>Actualizar Datos</Button>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <Button variant="secondary" onClick={fetchData}>
+            Actualizar
+          </Button>
+          <Button onClick={() => navigate("/damnificados/nuevo")}>
+            + Nuevo Damnificado
+          </Button>
+        </div>
       </div>
 
       {loading ? (

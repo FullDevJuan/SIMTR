@@ -22,10 +22,16 @@ export const createAsignacion = async (req, res) => {
     return res.status(400).json({ error: 'Faltan IDs requeridos: damnificado_id y albergue_id' });
   }
   
+  // Limpiamos los datos para no enviar campos ausentes y romper los DEFAULT de Postgres
+  const payload = { damnificado_id, albergue_id, registrado_por };
+  if (fecha_ingreso) payload.fecha_ingreso = fecha_ingreso;
+  if (fecha_salida) payload.fecha_salida = fecha_salida;
+  if (motivo_salida) payload.motivo_salida = motivo_salida;
+
   try {
     const { data, error } = await supabase
       .from('asignaciones_albergue')
-      .insert([{ damnificado_id, albergue_id, fecha_ingreso, fecha_salida, motivo_salida, registrado_por }])
+      .insert([payload])
       .select();
     if (error) throw error;
     
