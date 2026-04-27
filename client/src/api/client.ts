@@ -1,18 +1,21 @@
 // src/api/client.ts
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 interface FetchOptions extends RequestInit {
   data?: unknown;
 }
 
-export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+export async function apiFetch<T>(
+  endpoint: string,
+  options: FetchOptions = {},
+): Promise<T> {
   const { data, headers, ...customConfig } = options;
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem("access_token");
 
   const config: RequestInit = {
     ...customConfig,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
@@ -23,7 +26,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
-  
+
   // Tratamos de parsear el JSON incluso en errores para extraer el mensaje
   let responseData;
   try {
@@ -33,7 +36,9 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   }
 
   if (!response.ok) {
-    throw new Error(responseData?.error || 'Un error inesperado ocurrió en el servidor');
+    throw new Error(
+      responseData?.error || "Un error inesperado ocurrió en el servidor",
+    );
   }
 
   return responseData as T;
