@@ -46,7 +46,6 @@ export const AlbergueForm: React.FC = () => {
     if (payload.latitud) payload.latitud = Number(payload.latitud);
     if (payload.longitud) payload.longitud = Number(payload.longitud);
 
-    if (payload.fecha_apertura === '') delete payload.fecha_apertura;
     if (payload.fecha_cierre === '') delete payload.fecha_cierre;
 
     try {
