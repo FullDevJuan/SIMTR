@@ -1,5 +1,5 @@
 // src/api/client.ts
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface FetchOptions extends RequestInit {
   data?: unknown;
@@ -9,6 +9,7 @@ export async function apiFetch<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<T> {
+  console.log("API_URL", API_URL);
   const { data, headers, ...customConfig } = options;
   const token = localStorage.getItem("access_token");
 
