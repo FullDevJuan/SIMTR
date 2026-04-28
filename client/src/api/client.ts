@@ -9,7 +9,6 @@ export async function apiFetch<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<T> {
-  console.log("API_URL", API_URL);
   const { data, headers, ...customConfig } = options;
   const token = localStorage.getItem("access_token");
 
