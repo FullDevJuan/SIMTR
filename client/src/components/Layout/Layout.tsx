@@ -1,12 +1,14 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
-import { Home, Users, LogOut, MapPin, Settings } from 'lucide-react';
+import { useAlerts } from '../../lib/AlertContext';
+import { Home, Users, LogOut, MapPin, Settings, Bell } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './Layout.module.css';
 
 export const Layout: React.FC = () => {
   const { user, logout } = useAuth();
+  const { unreadCount } = useAlerts();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -58,6 +60,23 @@ export const Layout: React.FC = () => {
               Configuración
             </NavLink>
           )}
+
+          <NavLink
+            to="/alertas"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+            }
+          >
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className={styles.badgeAlert}>
+                  {unreadCount > 99 ? '+99' : unreadCount}
+                </span>
+              )}
+            </div>
+            Alertas
+          </NavLink>
         </nav>
       </aside>
       

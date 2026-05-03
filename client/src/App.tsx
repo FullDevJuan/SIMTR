@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './lib/AuthContext';
+import { AlertProvider } from './lib/AlertContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout/Layout';
 import { Login } from './pages/Login/Login';
@@ -13,6 +15,7 @@ import { AlbergueForm } from './pages/Albergues/AlbergueForm';
 import { AlbergueDetalle } from './pages/Albergues/AlbergueDetalle';
 import { Usuarios } from './pages/Configuracion/Usuarios';
 import { UsuarioForm } from './pages/Configuracion/UsuarioForm';
+import { Alertas } from './pages/Alertas/Alertas';
 
 const App: React.FC = () => {
   return (
@@ -22,7 +25,12 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
 
           <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
+            <Route element={
+              <AlertProvider>
+                <Toaster />
+                <Layout />
+              </AlertProvider>
+            }>
               <Route path="/dashboard" element={<Dashboard />} />
               
               <Route path="/damnificados" element={<Damnificados />} />
@@ -34,6 +42,8 @@ const App: React.FC = () => {
               <Route path="/albergues/nuevo" element={<AlbergueForm />} />
               <Route path="/albergues/:id/editar" element={<AlbergueForm />} />
               <Route path="/albergues/:id" element={<AlbergueDetalle />} />
+              
+              <Route path="/alertas" element={<Alertas />} />
 
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route path="/configuracion/usuarios" element={<Usuarios />} />

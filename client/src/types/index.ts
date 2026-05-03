@@ -58,3 +58,11 @@ export interface AsignacionAlbergue {
   fecha_salida?: string;
   motivo_salida?: string;
 }
+
+export interface Alerta {
+  id: string;
+  mensaje: string;
+  nivel: 'info' | 'warning' | 'critical';
+  leida: boolean;
+  created_at: string;
+}

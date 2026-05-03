@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api/client";
-import type { Albergue } from "../../types";
+import type { Albergue, AsignacionAlbergue, Damnificado } from "../../types";
 import { Card } from "../../components/Card/Card";
 import { Button } from "../../components/Button/Button";
+import { Table } from "../../components/Table/Table";
 import { useAuth } from "../../lib/AuthContext";
 import styles from "./Albergues.module.css";
 
@@ -11,6 +12,7 @@ export const AlbergueDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [albergue, setAlbergue] = useState<Albergue | null>(null);
+  const [damnificadosAsignados, setDamnificadosAsignados] = useState<Damnificado[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const { user } = useAuth();
@@ -18,8 +20,18 @@ export const AlbergueDetalle: React.FC = () => {
   useEffect(() => {
     const fetchDetalle = async () => {
       try {
-        const data = await apiFetch<Albergue>(`/albergues/${id}`);
-        setAlbergue(data);
+        const albergueData = await apiFetch<Albergue>(`/albergues/${id}`);
+        setAlbergue(albergueData);
+
+        const asignacionesData = await apiFetch<AsignacionAlbergue[]>('/asignaciones');
+        const damnificadosData = await apiFetch<Damnificado[]>('/damnificados');
+        
+        const enEsteAlbergue = asignacionesData
+            .filter(a => a.albergue_id === id && !a.fecha_salida)
+            .map(a => damnificadosData.find(d => d.id === a.damnificado_id))
+            .filter(d => d !== undefined) as Damnificado[];
+            
+        setDamnificadosAsignados(enEsteAlbergue);
       } catch (err: any) {
         setErrorMsg("Error al cargar el albergue: " + err.message);
       } finally {
@@ -135,6 +147,35 @@ export const AlbergueDetalle: React.FC = () => {
           )}
         </div>
       </Card>
+
+      <div style={{ marginTop: '2rem' }}>
+        <Card title="Damnificados Asignados">
+          {damnificadosAsignados.length > 0 ? (
+            <Table 
+              data={damnificadosAsignados} 
+              columns={[
+                { key: 'numero_documento', header: 'Documento' },
+                { key: 'nombres', header: 'Nombre Completo', render: (r) => `${r.nombres} ${r.apellidos}` },
+                { key: 'estado_actual', header: 'Estado', render: (r) => (
+                    <span className={styles.badge} style={{
+                      background: r.estado_actual === 'en_albergue' ? '#d1fae5' : '#f3f4f6',
+                      color: r.estado_actual === 'en_albergue' ? '#065f46' : '#374151'
+                    }}>
+                      {r.estado_actual.replace('_', ' ')}
+                    </span>
+                )},
+                { key: 'acciones', header: '', render: (r) => (
+                    <Button variant="secondary" onClick={() => navigate(`/damnificados/${r.id}`)}>Ver Ficha</Button>
+                )}
+              ]}
+            />
+          ) : (
+            <p style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+              No hay damnificados asignados actualmente a este albergue.
+            </p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };
