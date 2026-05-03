@@ -35,32 +35,52 @@ export const Login: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Iniciar Sesión</h1>
-        
-        {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
-        
-        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-          <Input 
-            label="Correo Electrónico" 
-            type="email" 
-            {...register('email', { required: 'El correo es requerido' })}
-            error={errors.email?.message as string}
-          />
-          
-          <Input 
-            label="Contraseña" 
-            type="password" 
-            {...register('password', { required: 'La contraseña es requerida' })}
-            error={errors.password?.message as string}
-          />
-          
-          <div className={styles.submitBtn}>
-            <Button type="submit" fullWidth disabled={isLoading}>
-              {isLoading ? 'Ingresando...' : 'Entrar'}
-            </Button>
+      {/* Sección Izquierda: Branding (Solo en Desktop) */}
+      <div className={styles.brandSection}>
+        <div className={styles.brandContent}>
+          <h1 className={styles.logo}>SIMTR</h1>
+          <h2 className={styles.tagline}>Monitoreo de emergencias</h2>
+          <p className={styles.location}>Montería, Córdoba</p>
+        </div>
+      </div>
+
+      {/* Sección Derecha: Formulario */}
+      <div className={styles.formSection}>
+        <div className={styles.card}>
+          <div className={styles.mobileHeader}>
+            <h1 className={styles.logoMobile}>SIMTR</h1>
+            <p className={styles.taglineMobile}>Monitoreo de emergencias<br/>Montería, Córdoba</p>
           </div>
-        </form>
+
+          <h2 className={styles.title}>Bienvenido de nuevo</h2>
+          <p className={styles.subtitle}>Ingresa tus credenciales para acceder al sistema.</p>
+          
+          {errorMsg && <div className={styles.errorAlert}>{errorMsg}</div>}
+          
+          <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+            <Input 
+              label="Correo Electrónico" 
+              type="email" 
+              placeholder="tu@correo.com"
+              {...register('email', { required: 'El correo es requerido' })}
+              error={errors.email?.message as string}
+            />
+            
+            <Input 
+              label="Contraseña" 
+              type="password" 
+              placeholder="••••••••"
+              {...register('password', { required: 'La contraseña es requerida' })}
+              error={errors.password?.message as string}
+            />
+            
+            <div className={styles.submitBtn}>
+              <Button type="submit" fullWidth disabled={isLoading}>
+                {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

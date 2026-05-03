@@ -38,20 +38,41 @@ export const Damnificados: React.FC = () => {
     {
       key: "estado_actual",
       header: "Estado",
-      render: (r: Damnificado) => (
-        <span
-          style={{
-            padding: "4px 8px",
-            borderRadius: "4px",
-            background: r.estado_actual === "ALBERGADO" ? "#d1fae5" : "#fef3c7",
-            color: r.estado_actual === "ALBERGADO" ? "#065f46" : "#92400e",
-            fontSize: "0.75rem",
-            fontWeight: "bold",
-          }}
-        >
-          {r.estado_actual}
-        </span>
-      ),
+      render: (r: Damnificado) => {
+        let bg = "#f3f4f6";
+        let color = "#374151";
+        let label = r.estado_actual;
+
+        if (r.estado_actual === "en_albergue") {
+          bg = "#d1fae5";
+          color = "#065f46";
+          label = "En Albergue";
+        } else if (r.estado_actual === "sin_ubicacion") {
+          bg = "#fee2e2";
+          color = "#991b1b";
+          label = "Sin Ubicación";
+        } else if (r.estado_actual === "en_casa_familiar") {
+          bg = "#dbeafe";
+          color = "#1e40af";
+          label = "Casa Familiar";
+        }
+
+        return (
+          <span
+            style={{
+              padding: "4px 8px",
+              borderRadius: "4px",
+              background: bg,
+              color: color,
+              fontSize: "0.75rem",
+              fontWeight: "bold",
+              textTransform: "uppercase"
+            }}
+          >
+            {label}
+          </span>
+        );
+      },
     },
     {
       key: "acciones",

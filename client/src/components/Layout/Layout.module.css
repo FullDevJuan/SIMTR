@@ -1,59 +1,77 @@
 .layout {
   display: flex;
-  min-height: 100vh;
-  background-color: var(--color-background);
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f8fafc;
 }
 
 .sidebar {
-  width: 250px;
-  background-color: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+  width: 260px;
+  background: linear-gradient(180deg, var(--color-primary) 0%, #1e3a8a 100%);
+  color: white;
+  border-right: none;
   display: flex;
   flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+  z-index: 10;
 }
 
 .sidebarLogo {
-  padding: 1.5rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  border-bottom: 1px solid var(--color-border);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: -0.5px;
 }
 
 .nav {
-  padding: 1rem 0;
+  padding: 1.5rem 0;
   flex: 1;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  color: var(--color-text-muted);
-  transition: all 0.2s;
+  gap: 0.875rem;
+  padding: 0.875rem 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-.navItem:hover, .navItemActive {
-  background-color: var(--color-background);
-  color: var(--color-primary);
-  border-right: 3px solid var(--color-primary);
+.navItem:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.navItemActive {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-right: 3px solid #60a5fa;
 }
 
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
-  height: 64px;
-  background-color: var(--color-surface);
+  height: 70px;
+  background-color: white;
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   padding: 0 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  z-index: 5;
 }
 
 .userInfo {
@@ -63,16 +81,17 @@
 }
 
 .roleBadge {
-  background-color: var(--color-primary);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+  border: 1px solid #bfdbfe;
 }
 
 .content {
-  padding: 2rem;
+  padding: 2.5rem;
   flex: 1;
   overflow-y: auto;
 }
@@ -91,5 +110,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--color-surface);
+  border: 2px solid white;
 }
