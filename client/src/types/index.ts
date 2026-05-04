@@ -33,6 +33,7 @@ export interface Albergue {
   fecha_apertura: string;
   fecha_cierre?: string;
   responsable_id?: string;
+  imagen_url?: string;
 }
 
 export interface Damnificado {

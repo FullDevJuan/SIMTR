@@ -9,6 +9,8 @@ import { Button } from '../../components/Button/Button';
 import { Card } from '../../components/Card/Card';
 import styles from './Albergues.module.css';
 
+import { supabase } from '../../lib/supabase';
+
 export const AlbergueForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -16,6 +18,8 @@ export const AlbergueForm: React.FC = () => {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Albergue>();
 
@@ -25,6 +29,9 @@ export const AlbergueForm: React.FC = () => {
         try {
           const albergueData = await apiFetch<Albergue>(`/albergues/${id}`);
           reset(albergueData);
+          if (albergueData.imagen_url) {
+            setPreviewUrl(albergueData.imagen_url);
+          }
         } catch (error: any) {
           setErrorMsg('Error cargando datos: ' + error.message);
         } finally {
@@ -35,20 +42,51 @@ export const AlbergueForm: React.FC = () => {
     init();
   }, [id, isEdit, reset]);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const onSubmit = async (data: Albergue) => {
     setSaving(true);
     setErrorMsg('');
 
-    const payload = { ...data };
-    payload.capacidad_maxima = Number(payload.capacidad_maxima);
-    payload.capacidad_actual = Number(payload.capacidad_actual) || 0;
-    
-    if (payload.latitud) payload.latitud = Number(payload.latitud);
-    if (payload.longitud) payload.longitud = Number(payload.longitud);
-
-    if (payload.fecha_cierre === '') delete (payload as any).fecha_cierre;
-
     try {
+      let finalImageUrl = data.imagen_url || undefined;
+
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('albergues_imgs')
+          .upload(filePath, imageFile);
+
+        if (uploadError) {
+          throw new Error('Error subiendo imagen: ' + uploadError.message);
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('albergues_imgs')
+          .getPublicUrl(filePath);
+
+        finalImageUrl = publicUrl;
+      }
+
+      const payload: any = { ...data };
+      payload.capacidad_maxima = Number(payload.capacidad_maxima);
+      payload.capacidad_actual = Number(payload.capacidad_actual) || 0;
+      
+      if (payload.latitud) payload.latitud = Number(payload.latitud);
+      if (payload.longitud) payload.longitud = Number(payload.longitud);
+
+      if (payload.fecha_cierre === '') delete payload.fecha_cierre;
+      if (finalImageUrl) payload.imagen_url = finalImageUrl;
+
       if (isEdit) {
         await apiFetch(`/albergues/${id}`, {
           method: 'PATCH',
@@ -79,6 +117,21 @@ export const AlbergueForm: React.FC = () => {
           <div className={styles.formGrid}>
             <div className={styles.sectionTitle}>Información General</div>
             
+            <div className={styles.imageUploadSection} style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>Imagen del Albergue</label>
+              {previewUrl && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <img src={previewUrl} alt="Vista previa" style={{ width: '100%', maxWidth: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }} />
+                </div>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageChange} 
+                style={{ padding: '0.5rem', border: '1px dashed #cbd5e1', borderRadius: '8px', width: '100%' }}
+              />
+            </div>
+
             <Input 
               label="Nombre del Albergue" 
               {...register('nombre', { required: 'Obligatorio' })} 

@@ -12,7 +12,7 @@ export const AlbergueDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [albergue, setAlbergue] = useState<Albergue | null>(null);
-  const [damnificadosAsignados, setDamnificadosAsignados] = useState<Damnificado[]>([]);
+  const [damnificadosAsignados, setDamnificadosAsignados] = useState<(Damnificado & { asignacion_id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const { user } = useAuth();
@@ -28,8 +28,12 @@ export const AlbergueDetalle: React.FC = () => {
         
         const enEsteAlbergue = asignacionesData
             .filter(a => a.albergue_id === id && !a.fecha_salida)
-            .map(a => damnificadosData.find(d => d.id === a.damnificado_id))
-            .filter(d => d !== undefined) as Damnificado[];
+            .map(a => {
+              const d = damnificadosData.find(d => d.id === a.damnificado_id);
+              if (d) return { ...d, asignacion_id: a.id! };
+              return null;
+            })
+            .filter(item => item !== null) as (Damnificado & { asignacion_id: string })[];
             
         setDamnificadosAsignados(enEsteAlbergue);
       } catch (err: any) {
@@ -47,14 +51,81 @@ export const AlbergueDetalle: React.FC = () => {
 
   const canEdit = user?.rol === "ADMIN" || user?.rol === "OPERADOR";
 
+  const handleRemoveDamnificado = async (asignacionId: string) => {
+    if (!window.confirm('¿Está seguro de que desea quitar a este damnificado del albergue?')) return;
+    
+    try {
+      await apiFetch(`/asignaciones/${asignacionId}`, { method: 'DELETE' });
+      // Recargamos los datos
+      const asignacionesData = await apiFetch<AsignacionAlbergue[]>('/asignaciones');
+      const damnificadosData = await apiFetch<Damnificado[]>('/damnificados');
+      
+      const enEsteAlbergue = asignacionesData
+          .filter(a => a.albergue_id === id && !a.fecha_salida)
+          .map(a => {
+            const d = damnificadosData.find(d => d.id === a.damnificado_id);
+            if (d) return { ...d, asignacion_id: a.id! };
+            return null;
+          })
+          .filter(item => item !== null) as (Damnificado & { asignacion_id: string })[];
+          
+      setDamnificadosAsignados(enEsteAlbergue);
+      
+      // También necesitamos recargar los datos del albergue para ver la capacidad actualizada
+      const albergueData = await apiFetch<Albergue>(`/albergues/${id}`);
+      setAlbergue(albergueData);
+      
+    } catch (err: any) {
+      alert("Error al quitar damnificado: " + err.message);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <Card title="Expediente del Albergue">
-        <div className={styles.detalleGrid}>
-          <div className={styles.detalleItem}>
-            <span className={styles.detalleLabel}>Nombre</span>
-            <span className={styles.detalleValue}>{albergue.nombre}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+          {(() => {
+            const percentage = Math.min(100, Math.round((albergue.capacidad_actual / albergue.capacidad_maxima) * 100));
+            let color = "#10b981"; // green
+            if (percentage >= 100) color = "#ef4444"; // red
+            else if (percentage >= 80) color = "#f59e0b"; // yellow
+            
+            const radius = 36;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+
+            return (
+              <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0 }}>
+                <svg width="80" height="80" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="40" cy="40" r={radius} stroke="#e2e8f0" strokeWidth="8" fill="none" />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r={radius}
+                    stroke={color}
+                    strokeWidth="8"
+                    fill="none"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    style={{ transition: 'stroke-dashoffset 0.5s ease-out, stroke 0.3s ease' }}
+                  />
+                </svg>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-text-main)' }}>
+                  {percentage}%
+                </div>
+              </div>
+            );
+          })()}
+          <div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-main)', margin: '0 0 0.5rem 0' }}>{albergue.nombre}</h2>
+            <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+              Ocupación: {albergue.capacidad_actual} de {albergue.capacidad_maxima} personas
+            </span>
           </div>
+        </div>
+
+        <div className={styles.detalleGrid}>
           <div className={styles.detalleItem}>
             <span className={styles.detalleLabel}>Tipo</span>
             <span
@@ -72,12 +143,7 @@ export const AlbergueDetalle: React.FC = () => {
             <span className={styles.detalleLabel}>Barrio</span>
             <span className={styles.detalleValue}>{albergue.barrio}</span>
           </div>
-          <div className={styles.detalleItem}>
-            <span className={styles.detalleLabel}>Ocupación</span>
-            <span className={styles.detalleValue}>
-              {albergue.capacidad_actual} / {albergue.capacidad_maxima}
-            </span>
-          </div>
+
           <div className={styles.detalleItem}>
             <span className={styles.detalleLabel}>Estado</span>
             <span className={styles.detalleValue}>
@@ -164,8 +230,15 @@ export const AlbergueDetalle: React.FC = () => {
                       {r.estado_actual.replace('_', ' ')}
                     </span>
                 )},
-                { key: 'acciones', header: '', render: (r) => (
-                    <Button variant="secondary" onClick={() => navigate(`/damnificados/${r.id}`)}>Ver Ficha</Button>
+                { key: 'acciones', header: 'Acciones', render: (r) => (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <Button variant="secondary" onClick={() => navigate(`/damnificados/${r.id}`)}>Ver Ficha</Button>
+                      {canEdit && (
+                        <Button variant="secondary" style={{ color: 'var(--color-danger)' }} onClick={() => handleRemoveDamnificado(r.asignacion_id)}>
+                          Quitar
+                        </Button>
+                      )}
+                    </div>
                 )}
               ]}
             />
