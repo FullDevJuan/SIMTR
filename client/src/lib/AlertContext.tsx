@@ -16,7 +16,7 @@ let globalChannel: ReturnType<typeof supabase.channel> | null = null;
 
 const initGlobalChannel = () => {
   if (!globalChannel) {
-    const token = localStorage.getItem("access_token");
+    const token = sessionStorage.getItem("access_token");
     if (token) {
       // Autenticamos el socket en tiempo real con el JWT para que pase las políticas de RLS
       supabase.realtime.setAuth(token);

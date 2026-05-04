@@ -10,7 +10,7 @@ export async function apiFetch<T>(
   options: FetchOptions = {},
 ): Promise<T> {
   const { data, headers, ...customConfig } = options;
-  const token = localStorage.getItem("access_token");
+  const token = sessionStorage.getItem("access_token");
 
   const config: RequestInit = {
     ...customConfig,
