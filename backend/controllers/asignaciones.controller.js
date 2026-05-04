@@ -48,3 +48,29 @@ export const createAsignacion = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const deleteAsignacion = async (req, res) => {
+  const { id } = req.params;
+  const usuario_id = req.user?.id;
+
+  try {
+    const { error } = await supabase
+      .from('asignaciones_albergue')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    await logAudit({
+      tabla_afectada: 'asignaciones_albergue',
+      operacion: 'DELETE',
+      registro_id: id,
+      usuario_id,
+      ip_origen: req.ip
+    });
+
+    res.json({ message: 'Asignación eliminada correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

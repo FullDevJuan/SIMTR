@@ -24,7 +24,7 @@ export const getAlbergueById = async (req, res) => {
 };
 
 export const createAlbergue = async (req, res) => {
-  const { nombre, tipo, direccion, barrio, latitud, longitud, capacidad_maxima, capacidad_actual, estado, condiciones_sanitarias, fecha_apertura, fecha_cierre } = req.body;
+  const { nombre, tipo, direccion, barrio, latitud, longitud, capacidad_maxima, capacidad_actual, estado, condiciones_sanitarias, fecha_apertura, fecha_cierre, imagen_url } = req.body;
   const responsable_id = req.user?.id; // sacado del middleware
   
   if (!nombre || !tipo || !direccion || !barrio || latitud === undefined || longitud === undefined || !capacidad_maxima || !condiciones_sanitarias) {
@@ -34,7 +34,7 @@ export const createAlbergue = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('albergues')
-      .insert([{ nombre, tipo, direccion, barrio, latitud, longitud, capacidad_maxima, capacidad_actual, estado, condiciones_sanitarias, fecha_apertura, fecha_cierre, responsable_id }])
+      .insert([{ nombre, tipo, direccion, barrio, latitud, longitud, capacidad_maxima, capacidad_actual, estado, condiciones_sanitarias, fecha_apertura, fecha_cierre, responsable_id, imagen_url }])
       .select();
     if (error) throw error;
     
