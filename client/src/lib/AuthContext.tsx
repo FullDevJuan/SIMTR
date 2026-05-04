@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import type { User } from "../types";
+import { supabase } from "./supabase";
 
 interface AuthContextType {
   user: User | null;
@@ -21,6 +22,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const storedUser = sessionStorage.getItem("user_data");
     return storedUser ? JSON.parse(storedUser) : null;
   });
+
+  // Sincronizar el token con el cliente de Supabase para RLS
+  useEffect(() => {
+    if (token) {
+      // Configuramos la sesión en el cliente de Supabase para que Storage sepa quién es el usuario
+      supabase.auth.setSession({
+        access_token: token,
+        refresh_token: "", // No manejamos refresh token manualmente aquí
+      }).catch(err => console.error("Error setting supabase session:", err));
+    }
+  }, [token]);
 
   const login = (newToken: string, newUser: User) => {
     sessionStorage.setItem("access_token", newToken);

@@ -62,6 +62,12 @@ export const AlbergueForm: React.FC = () => {
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${fileName}`;
 
+        // Aseguramos la sesión manualmente antes de subir para evitar errores de RLS
+        const token = sessionStorage.getItem("access_token");
+        if (token) {
+          await supabase.auth.setSession({ access_token: token, refresh_token: "" });
+        }
+
         const { error: uploadError } = await supabase.storage
           .from('albergues_imgs')
           .upload(filePath, imageFile);
