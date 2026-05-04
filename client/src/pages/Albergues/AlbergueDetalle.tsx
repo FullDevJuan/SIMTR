@@ -52,30 +52,23 @@ export const AlbergueDetalle: React.FC = () => {
   const canEdit = user?.rol === "ADMIN" || user?.rol === "OPERADOR";
 
   const handleRemoveDamnificado = async (asignacionId: string) => {
+    if (!asignacionId) {
+      alert("Error: ID de asignación no encontrado.");
+      return;
+    }
+    
     if (!window.confirm('¿Está seguro de que desea quitar a este damnificado del albergue?')) return;
     
     try {
-      await apiFetch(`/asignaciones/${asignacionId}`, { method: 'DELETE' });
-      // Recargamos los datos
-      const asignacionesData = await apiFetch<AsignacionAlbergue[]>('/asignaciones');
-      const damnificadosData = await apiFetch<Damnificado[]>('/damnificados');
+      console.log('Borrando asignación:', asignacionId);
+      const res = await apiFetch<any>(`/asignaciones/${asignacionId}`, { method: 'DELETE' });
+      console.log('Respuesta borrado:', res);
       
-      const enEsteAlbergue = asignacionesData
-          .filter(a => a.albergue_id === id && !a.fecha_salida)
-          .map(a => {
-            const d = damnificadosData.find(d => d.id === a.damnificado_id);
-            if (d) return { ...d, asignacion_id: a.id! };
-            return null;
-          })
-          .filter(item => item !== null) as (Damnificado & { asignacion_id: string })[];
-          
-      setDamnificadosAsignados(enEsteAlbergue);
-      
-      // También necesitamos recargar los datos del albergue para ver la capacidad actualizada
-      const albergueData = await apiFetch<Albergue>(`/albergues/${id}`);
-      setAlbergue(albergueData);
+      // Forzar recarga de los datos locales para asegurar que la UI se actualiza
+      window.location.reload(); 
       
     } catch (err: any) {
+      console.error('Error al borrar:', err);
       alert("Error al quitar damnificado: " + err.message);
     }
   };

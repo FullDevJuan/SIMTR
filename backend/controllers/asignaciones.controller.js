@@ -53,24 +53,45 @@ export const deleteAsignacion = async (req, res) => {
   const { id } = req.params;
   const usuario_id = req.user?.id;
 
+  console.log(`[Backend] Intentando eliminar asignación ID: ${id} por usuario: ${usuario_id}`);
+
   try {
-    const { error } = await supabase
+    const { data, error, status } = await supabase
       .from('asignaciones_albergue')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select(); // Agregamos .select() para confirmar qué se borró
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Backend] Error de Supabase al borrar:', error);
+      throw error;
+    }
 
-    await logAudit({
-      tabla_afectada: 'asignaciones_albergue',
-      operacion: 'DELETE',
-      registro_id: id,
-      usuario_id,
-      ip_origen: req.ip
+    console.log(`[Backend] Resultado del borrado (status ${status}):`, data);
+
+    if (!data || data.length === 0) {
+      console.warn(`[Backend] No se encontró ninguna asignación con ID: ${id} para borrar.`);
+    }
+
+    try {
+      await logAudit({
+        tabla_afectada: 'asignaciones_albergue',
+        operacion: 'DELETE',
+        registro_id: id,
+        usuario_id,
+        ip_origen: req.ip
+      });
+    } catch (auditError) {
+      console.error('[Backend] Error logging audit:', auditError.message);
+    }
+
+    res.json({ 
+      message: 'Asignación procesada', 
+      deleted: data && data.length > 0,
+      data: data ? data[0] : null
     });
-
-    res.json({ message: 'Asignación eliminada correctamente' });
   } catch (error) {
+    console.error('[Backend] Error en deleteAsignacion:', error.message);
     res.status(500).json({ error: error.message });
   }
 };
