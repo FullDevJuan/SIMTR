@@ -4,7 +4,7 @@ import { apiFetch } from "../../api/client";
 import type { Albergue } from "../../types";
 import { Button } from "../../components/Button/Button";
 import { useAuth } from "../../lib/AuthContext";
-import { MapPin, Users, Activity } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 import defaultAlbergueImg from "../../assets/albergue_generic.jpg";
 import styles from "./Albergues.module.css";
 
@@ -61,7 +61,9 @@ export const Albergues: React.FC = () => {
           {albergues.map((albergue) => {
             const percentage = Math.min(
               100,
-              Math.round((albergue.capacidad_actual / albergue.capacidad_maxima) * 100)
+              Math.round(
+                (albergue.capacidad_actual / albergue.capacidad_maxima) * 100,
+              ),
             );
             const progressColor = getProgressColor(percentage);
 
@@ -93,23 +95,29 @@ export const Albergues: React.FC = () => {
                     {albergue.estado}
                   </div>
                 </div>
-                
+
                 <div className={styles.cardContent}>
                   <h3 className={styles.cardTitle}>{albergue.nombre}</h3>
                   <div className={styles.cardInfoRow}>
                     <MapPin size={16} />
-                    <span>{albergue.direccion}, {albergue.barrio}</span>
+                    <span>
+                      {albergue.direccion}, {albergue.barrio}
+                    </span>
                   </div>
-                  
+
                   <div className={styles.progressSection}>
                     <div className={styles.progressHeader}>
                       <div className={styles.cardInfoRow}>
                         <Users size={16} />
                         <span className={styles.progressText}>
-                          Ocupación: {albergue.capacidad_actual} / {albergue.capacidad_maxima}
+                          Ocupación: {albergue.capacidad_actual} /{" "}
+                          {albergue.capacidad_maxima}
                         </span>
                       </div>
-                      <span className={styles.percentageText} style={{ color: progressColor }}>
+                      <span
+                        className={styles.percentageText}
+                        style={{ color: progressColor }}
+                      >
                         {percentage}%
                       </span>
                     </div>
@@ -123,7 +131,7 @@ export const Albergues: React.FC = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className={styles.cardActions}>
                     <Button
                       variant="secondary"
@@ -135,7 +143,9 @@ export const Albergues: React.FC = () => {
                     {canEdit && (
                       <Button
                         variant="primary"
-                        onClick={() => navigate(`/albergues/${albergue.id}/editar`)}
+                        onClick={() =>
+                          navigate(`/albergues/${albergue.id}/editar`)
+                        }
                         className={styles.actionBtn}
                       >
                         Editar
