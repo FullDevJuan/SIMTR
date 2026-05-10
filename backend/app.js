@@ -34,16 +34,25 @@ const setupRealtimeSubscriptions = () => {
           );
 
           try {
-            // Guardar log en la tabla alertas (silencioso, si falla solo mostramos en consola)
-            await supabase.from("alertas").insert([
+            // Guardar log en la tabla alertas
+            const { error: insertError } = await supabase.from("alertas").insert([
               {
                 mensaje: `Albergue ${nombre} llenó su capacidad máxima (${capacidad_actual}/${capacidad_maxima}). ID: ${id}`,
                 nivel: "critical",
               },
             ]);
+
+            if (insertError) {
+              console.error(
+                "[Realtime] Error de Supabase al insertar alerta:",
+                insertError.message,
+              );
+            } else {
+              console.log("[Realtime] Alerta automática registrada en DB.");
+            }
           } catch (error) {
             console.error(
-              "Error insertando la alerta automática:",
+              "[Realtime] Error inesperado insertando la alerta automática:",
               error.message,
             );
           }
