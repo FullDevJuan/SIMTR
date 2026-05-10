@@ -4,12 +4,21 @@ import { apiFetch } from "../../api/client";
 import type { Damnificado } from "../../types";
 import { Table } from "../../components/Table/Table";
 import { Button } from "../../components/Button/Button";
+import { Input } from "../../components/Input/Input";
+import { Select } from "../../components/Select/Select";
 import { useAuth } from "../../lib/AuthContext";
 import styles from "./Damnificados.module.css";
 
 export const Damnificados: React.FC = () => {
   const [damnificados, setDamnificados] = useState<Damnificado[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filtros
+  const [filterNombre, setFilterNombre] = useState("");
+  const [filterDocumento, setFilterDocumento] = useState("");
+  const [filterEstado, setFilterEstado] = useState("");
+  const [filterBarrio, setFilterBarrio] = useState("");
+
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -102,6 +111,16 @@ export const Damnificados: React.FC = () => {
     },
   ];
 
+  const filteredDamnificados = damnificados.filter((d) => {
+    const nombreCompleto = `${d.nombres} ${d.apellidos}`.toLowerCase();
+    const matchNombre = nombreCompleto.includes(filterNombre.toLowerCase());
+    const matchDocumento = d.numero_documento.toLowerCase().includes(filterDocumento.toLowerCase());
+    const matchEstado = filterEstado === "" || d.estado_actual === filterEstado;
+    const matchBarrio = filterBarrio === "" || (d.barrio_afectado || "").toLowerCase().includes(filterBarrio.toLowerCase());
+    
+    return matchNombre && matchDocumento && matchEstado && matchBarrio;
+  });
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -118,10 +137,46 @@ export const Damnificados: React.FC = () => {
         </div>
       </div>
 
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: "150px" }}>
+          <Input 
+            placeholder="Buscar por documento..." 
+            value={filterDocumento} 
+            onChange={(e) => setFilterDocumento(e.target.value)} 
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: "200px" }}>
+          <Input 
+            placeholder="Buscar por nombre..." 
+            value={filterNombre} 
+            onChange={(e) => setFilterNombre(e.target.value)} 
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: "150px" }}>
+          <Input 
+            placeholder="Buscar por barrio..." 
+            value={filterBarrio} 
+            onChange={(e) => setFilterBarrio(e.target.value)} 
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: "150px" }}>
+          <Select 
+            value={filterEstado}
+            onChange={(e) => setFilterEstado(e.target.value)}
+            options={[
+              { value: "", label: "Todos los estados" },
+              { value: "en_albergue", label: "En Albergue" },
+              { value: "sin_ubicacion", label: "Sin Ubicación" },
+              { value: "en_casa_familiar", label: "Casa Familiar" }
+            ]}
+          />
+        </div>
+      </div>
+
       {loading ? (
         <div>Cargando registros...</div>
       ) : (
-        <Table columns={columns} data={damnificados} />
+        <Table columns={columns} data={filteredDamnificados} itemsPerPage={10} />
       )}
     </div>
   );

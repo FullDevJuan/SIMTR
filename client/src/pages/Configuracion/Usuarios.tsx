@@ -4,12 +4,21 @@ import { apiFetch } from "../../api/client";
 import type { User as Usuario } from "../../types";
 import { Table } from "../../components/Table/Table";
 import { Button } from "../../components/Button/Button";
+import { Input } from "../../components/Input/Input";
+import { Select } from "../../components/Select/Select";
 import styles from "./Usuarios.module.css";
 
 export const Usuarios: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filtros de auditoría
+  const [filterUsuario, setFilterUsuario] = useState("");
+  const [filterOperacion, setFilterOperacion] = useState("");
+  const [filterTabla, setFilterTabla] = useState("");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -152,6 +161,20 @@ export const Usuarios: React.FC = () => {
     { key: "ip_origen", header: "IP Origen" },
   ];
 
+  const filteredLogs = logs
+    .filter((log) => {
+      const userName = log.usuarios?.nombre_completo || "Sistema / Público";
+      const matchUsuario = userName.toLowerCase().includes(filterUsuario.toLowerCase());
+      const matchOperacion = filterOperacion === "" || log.operacion === filterOperacion;
+      const matchTabla = filterTabla === "" || log.tabla_afectada.toLowerCase().includes(filterTabla.toLowerCase());
+      return matchUsuario && matchOperacion && matchTabla;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -173,11 +196,53 @@ export const Usuarios: React.FC = () => {
       )}
 
       <div style={{ marginTop: "3rem" }}>
-        <h2 className={styles.title} style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Logs de Auditoría</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
+          <h2 className={styles.title} style={{ fontSize: '1.5rem', margin: 0 }}>Logs de Auditoría</h2>
+        </div>
+        
+        <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: "200px" }}>
+            <Input 
+              placeholder="Buscar por usuario..." 
+              value={filterUsuario} 
+              onChange={(e) => setFilterUsuario(e.target.value)} 
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: "150px" }}>
+            <Select 
+              value={filterOperacion}
+              onChange={(e) => setFilterOperacion(e.target.value)}
+              options={[
+                { value: "", label: "Todas las operaciones" },
+                { value: "INSERT", label: "INSERT" },
+                { value: "UPDATE", label: "UPDATE" },
+                { value: "DELETE", label: "DELETE" }
+              ]}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: "200px" }}>
+            <Input 
+              placeholder="Buscar por tabla..." 
+              value={filterTabla} 
+              onChange={(e) => setFilterTabla(e.target.value)} 
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: "150px" }}>
+            <Select 
+              value={sortOrder}
+              onChange={(e: any) => setSortOrder(e.target.value)}
+              options={[
+                { value: "desc", label: "Más recientes primero" },
+                { value: "asc", label: "Más antiguos primero" }
+              ]}
+            />
+          </div>
+        </div>
+
         {loading ? (
           <div>Cargando registros...</div>
         ) : (
-          <Table columns={logColumns} data={logs} itemsPerPage={10} />
+          <Table columns={logColumns} data={filteredLogs} itemsPerPage={10} />
         )}
       </div>
     </div>
