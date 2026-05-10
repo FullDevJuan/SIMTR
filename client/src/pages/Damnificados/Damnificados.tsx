@@ -4,12 +4,16 @@ import { apiFetch } from "../../api/client";
 import type { Damnificado } from "../../types";
 import { Table } from "../../components/Table/Table";
 import { Button } from "../../components/Button/Button";
+import { useAuth } from "../../lib/AuthContext";
 import styles from "./Damnificados.module.css";
 
 export const Damnificados: React.FC = () => {
   const [damnificados, setDamnificados] = useState<Damnificado[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const canEdit = user?.rol === "ADMIN" || user?.rol === "OPERADOR";
 
   useEffect(() => {
     fetchData();
@@ -85,12 +89,14 @@ export const Damnificados: React.FC = () => {
           >
             Ver
           </Button>
-          <Button
-            variant="secondary"
-            onClick={() => navigate(`/damnificados/${r.id}/editar`)}
-          >
-            Editar
-          </Button>
+          {canEdit && (
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/damnificados/${r.id}/editar`)}
+            >
+              Editar
+            </Button>
+          )}
         </div>
       ),
     },
@@ -104,9 +110,11 @@ export const Damnificados: React.FC = () => {
           <Button variant="secondary" onClick={fetchData}>
             Actualizar
           </Button>
-          <Button onClick={() => navigate("/damnificados/nuevo")}>
-            + Nuevo Damnificado
-          </Button>
+          {canEdit && (
+            <Button onClick={() => navigate("/damnificados/nuevo")}>
+              + Nuevo Damnificado
+            </Button>
+          )}
         </div>
       </div>
 

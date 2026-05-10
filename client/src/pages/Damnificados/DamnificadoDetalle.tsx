@@ -5,6 +5,7 @@ import type { Damnificado, Albergue } from "../../types";
 import { Card } from "../../components/Card/Card";
 import { Button } from "../../components/Button/Button";
 import { Table } from "../../components/Table/Table";
+import { useAuth } from "../../lib/AuthContext";
 import styles from "./DamnificadoDetalle.module.css";
 
 export const DamnificadoDetalle: React.FC = () => {
@@ -14,6 +15,9 @@ export const DamnificadoDetalle: React.FC = () => {
   const [damnificado, setDamnificado] = useState<Damnificado | null>(null);
   const [historial, setHistorial] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const canEdit = user?.rol === "ADMIN" || user?.rol === "OPERADOR";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,11 +60,13 @@ export const DamnificadoDetalle: React.FC = () => {
         <Button variant="secondary" onClick={() => navigate("/damnificados")}>
           Volver
         </Button>
-        <Button
-          onClick={() => navigate(`/damnificados/${damnificado.id}/editar`)}
-        >
-          Editar Información
-        </Button>
+        {canEdit && (
+          <Button
+            onClick={() => navigate(`/damnificados/${damnificado.id}/editar`)}
+          >
+            Editar Información
+          </Button>
+        )}
       </div>
 
       <Card

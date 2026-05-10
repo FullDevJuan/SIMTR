@@ -34,14 +34,17 @@ const App: React.FC = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               
               <Route path="/damnificados" element={<Damnificados />} />
-              <Route path="/damnificados/nuevo" element={<DamnificadoForm />} />
-              <Route path="/damnificados/:id/editar" element={<DamnificadoForm />} />
               <Route path="/damnificados/:id" element={<DamnificadoDetalle />} />
 
               <Route path="/albergues" element={<Albergues />} />
-              <Route path="/albergues/nuevo" element={<AlbergueForm />} />
-              <Route path="/albergues/:id/editar" element={<AlbergueForm />} />
               <Route path="/albergues/:id" element={<AlbergueDetalle />} />
+
+              <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'OPERADOR']} />}>
+                <Route path="/damnificados/nuevo" element={<DamnificadoForm />} />
+                <Route path="/damnificados/:id/editar" element={<DamnificadoForm />} />
+                <Route path="/albergues/nuevo" element={<AlbergueForm />} />
+                <Route path="/albergues/:id/editar" element={<AlbergueForm />} />
+              </Route>
               
               <Route path="/alertas" element={<Alertas />} />
 
