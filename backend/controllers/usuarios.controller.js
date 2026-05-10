@@ -3,9 +3,30 @@ import { logAudit } from '../utils/audit.logger.js';
 
 export const getUsuarios = async (req, res) => {
   try {
-    const { data, error } = await supabase.from('usuarios').select('*');
-    if (error) throw error;
-    res.json(data);
+    const { data: publicUsers, error: publicError } = await supabase.from('usuarios').select('*');
+    if (publicError) throw publicError;
+
+    // Obtener información de autenticación usando la API de Admin
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+    
+    let mergedUsers = publicUsers;
+
+    if (!authError && authData && authData.users) {
+      // Combinar los datos
+      mergedUsers = publicUsers.map(user => {
+        const authInfo = authData.users.find(u => u.id === user.auth_user_id);
+        if (authInfo) {
+          return {
+            ...user,
+            auth_created_at: authInfo.created_at,
+            auth_last_sign_in_at: authInfo.last_sign_in_at
+          };
+        }
+        return user;
+      });
+    }
+
+    res.json(mergedUsers);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

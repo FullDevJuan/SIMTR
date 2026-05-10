@@ -7,6 +7,7 @@ import { Input } from "../../components/Input/Input";
 import { Select } from "../../components/Select/Select";
 import { Button } from "../../components/Button/Button";
 import { Card } from "../../components/Card/Card";
+import { Table } from "../../components/Table/Table";
 import styles from "./Usuarios.module.css";
 
 interface FormData extends Omit<Usuario, "id" | "auth_user_id" | "created_at"> {
@@ -22,6 +23,7 @@ export const UsuarioForm: React.FC = () => {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [logs, setLogs] = useState<any[]>([]);
 
   const {
     register,
@@ -34,13 +36,18 @@ export const UsuarioForm: React.FC = () => {
     const init = async () => {
       if (isEdit) {
         try {
-          const usuarioData = await apiFetch<Usuario>(`/usuarios/${id}`);
+          const [usuarioData, auditData] = await Promise.all([
+            apiFetch<Usuario>(`/usuarios/${id}`),
+            apiFetch<any[]>(`/audit?usuario_id=${id}`)
+          ]);
+
           reset({
             nombre_completo: usuarioData.nombre_completo,
             telefono: usuarioData.telefono,
             rol: usuarioData.rol,
             activoStr: usuarioData.activo ? "true" : "false",
           });
+          setLogs(auditData);
         } catch (error: any) {
           setErrorMsg("Error cargando datos: " + error.message);
         } finally {
@@ -87,6 +94,46 @@ export const UsuarioForm: React.FC = () => {
       setSaving(false);
     }
   };
+
+  const logColumns = [
+    {
+      key: "created_at",
+      header: "Fecha y Hora",
+      render: (r: any) => new Date(r.created_at).toLocaleString(),
+    },
+    {
+      key: "operacion",
+      header: "Operación",
+      render: (r: any) => (
+        <span
+          className={styles.badge}
+          style={{
+            background:
+              r.operacion === "INSERT"
+                ? "#d1fae5"
+                : r.operacion === "UPDATE"
+                  ? "#fef3c7"
+                  : r.operacion === "DELETE"
+                    ? "#fee2e2"
+                    : "#f1f5f9",
+            color:
+              r.operacion === "INSERT"
+                ? "#065f46"
+                : r.operacion === "UPDATE"
+                  ? "#92400e"
+                  : r.operacion === "DELETE"
+                    ? "#991b1b"
+                    : "#475569",
+          }}
+        >
+          {r.operacion}
+        </span>
+      ),
+    },
+    { key: "tabla_afectada", header: "Tabla" },
+    { key: "registro_id", header: "ID Registro" },
+    { key: "ip_origen", header: "IP Origen" },
+  ];
 
   if (loading) return <div>Cargando información...</div>;
 
@@ -170,6 +217,19 @@ export const UsuarioForm: React.FC = () => {
           </div>
         </form>
       </Card>
+
+      {isEdit && (
+        <div style={{ marginTop: "3rem" }}>
+          <h2 className={styles.title} style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+            Historial de Acciones del Usuario
+          </h2>
+          {logs.length > 0 ? (
+            <Table columns={logColumns} data={logs} itemsPerPage={5} />
+          ) : (
+            <p style={{ color: "var(--color-text-muted)" }}>No hay registros de actividad para este usuario.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

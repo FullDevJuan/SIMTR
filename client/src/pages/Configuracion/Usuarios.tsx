@@ -8,6 +8,7 @@ import styles from "./Usuarios.module.css";
 
 export const Usuarios: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -18,8 +19,12 @@ export const Usuarios: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await apiFetch<Usuario[]>("/usuarios");
-      setUsuarios(data);
+      const [userData, auditData] = await Promise.all([
+        apiFetch<Usuario[]>("/usuarios"),
+        apiFetch<any[]>("/audit")
+      ]);
+      setUsuarios(userData);
+      setLogs(auditData);
     } catch (error) {
       console.error("Error", error);
     } finally {
@@ -71,6 +76,22 @@ export const Usuarios: React.FC = () => {
       ),
     },
     {
+      key: "auth_created_at",
+      header: "Fecha Registro",
+      render: (r: any) =>
+        r.auth_created_at
+          ? new Date(r.auth_created_at).toLocaleString()
+          : "N/A",
+    },
+    {
+      key: "auth_last_sign_in_at",
+      header: "Último Acceso",
+      render: (r: any) =>
+        r.auth_last_sign_in_at
+          ? new Date(r.auth_last_sign_in_at).toLocaleString()
+          : "Nunca",
+    },
+    {
       key: "acciones",
       header: "Acciones",
       render: (r: Usuario) => (
@@ -84,6 +105,51 @@ export const Usuarios: React.FC = () => {
         </div>
       ),
     },
+  ];
+
+  const logColumns = [
+    {
+      key: "created_at",
+      header: "Fecha y Hora",
+      render: (r: any) => new Date(r.created_at).toLocaleString(),
+    },
+    {
+      key: "usuario",
+      header: "Usuario",
+      render: (r: any) => r.usuarios?.nombre_completo || "Sistema / Público",
+    },
+    {
+      key: "operacion",
+      header: "Operación",
+      render: (r: any) => (
+        <span
+          className={styles.badge}
+          style={{
+            background:
+              r.operacion === "INSERT"
+                ? "#d1fae5"
+                : r.operacion === "UPDATE"
+                  ? "#fef3c7"
+                  : r.operacion === "DELETE"
+                    ? "#fee2e2"
+                    : "#f1f5f9",
+            color:
+              r.operacion === "INSERT"
+                ? "#065f46"
+                : r.operacion === "UPDATE"
+                  ? "#92400e"
+                  : r.operacion === "DELETE"
+                    ? "#991b1b"
+                    : "#475569",
+          }}
+        >
+          {r.operacion}
+        </span>
+      ),
+    },
+    { key: "tabla_afectada", header: "Tabla" },
+    { key: "registro_id", header: "ID Registro" },
+    { key: "ip_origen", header: "IP Origen" },
   ];
 
   return (
@@ -105,6 +171,15 @@ export const Usuarios: React.FC = () => {
       ) : (
         <Table columns={columns} data={usuarios} />
       )}
+
+      <div style={{ marginTop: "3rem" }}>
+        <h2 className={styles.title} style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Logs de Auditoría</h2>
+        {loading ? (
+          <div>Cargando registros...</div>
+        ) : (
+          <Table columns={logColumns} data={logs} itemsPerPage={10} />
+        )}
+      </div>
     </div>
   );
 };
