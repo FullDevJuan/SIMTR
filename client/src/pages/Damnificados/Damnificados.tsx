@@ -7,6 +7,7 @@ import { Button } from "../../components/Button/Button";
 import { Input } from "../../components/Input/Input";
 import { Select } from "../../components/Select/Select";
 import { useAuth } from "../../lib/AuthContext";
+import { Users, Home, Heart, MapPinOff } from "lucide-react";
 import styles from "./Damnificados.module.css";
 
 export const Damnificados: React.FC = () => {
@@ -135,6 +136,54 @@ export const Damnificados: React.FC = () => {
             </Button>
           )}
         </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+        
+        {/* Total Registrados */}
+        <div style={{ background: "var(--color-surface)", padding: "1rem", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-sm)", display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ backgroundColor: "#f3f4f6", padding: "0.75rem", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Users size={24} color="#4b5563" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flex: 1 }}>
+            <div style={{ color: "var(--color-text-muted)", fontSize: "0.875rem", fontWeight: 500 }}>Total Registrados</div>
+            <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--color-text-main)", lineHeight: 1.2 }}>{damnificados.length}</div>
+          </div>
+        </div>
+
+        {/* En Albergue */}
+        <div style={{ background: "var(--color-surface)", padding: "1rem", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-sm)", display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ backgroundColor: "#d1fae5", padding: "0.75rem", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Home size={24} color="#065f46" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flex: 1 }}>
+            <div style={{ color: "var(--color-text-muted)", fontSize: "0.875rem", fontWeight: 500 }}>En Albergue</div>
+            <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#065f46", lineHeight: 1.2 }}>{damnificados.filter(d => d.estado_actual === 'en_albergue').length}</div>
+          </div>
+        </div>
+
+        {/* Casa Familiar */}
+        <div style={{ background: "var(--color-surface)", padding: "1rem", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-sm)", display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ backgroundColor: "#dbeafe", padding: "0.75rem", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Heart size={24} color="#1e40af" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flex: 1 }}>
+            <div style={{ color: "var(--color-text-muted)", fontSize: "0.875rem", fontWeight: 500 }}>Casa Familiar</div>
+            <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#1e40af", lineHeight: 1.2 }}>{damnificados.filter(d => d.estado_actual === 'en_casa_familiar').length}</div>
+          </div>
+        </div>
+
+        {/* Sin Ubicación */}
+        <div style={{ background: "var(--color-surface)", padding: "1rem", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-sm)", display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ backgroundColor: "#fee2e2", padding: "0.75rem", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <MapPinOff size={24} color="#991b1b" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flex: 1 }}>
+            <div style={{ color: "var(--color-text-muted)", fontSize: "0.875rem", fontWeight: 500 }}>Sin Ubicación</div>
+            <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#991b1b", lineHeight: 1.2 }}>{damnificados.filter(d => d.estado_actual === 'sin_ubicacion').length}</div>
+          </div>
+        </div>
+        
       </div>
 
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
