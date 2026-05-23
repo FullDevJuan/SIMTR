@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
 import { useAlerts } from '../../lib/AlertContext';
-import { Home, Users, LogOut, MapPin, Settings, Bell } from 'lucide-react';
+import { Home, Users, LogOut, MapPin, Settings, Bell, Package } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './Layout.module.css';
 
@@ -47,6 +47,16 @@ export const Layout: React.FC = () => {
           >
             <MapPin size={20} />
             Albergues
+          </NavLink>
+          
+          <NavLink
+            to="/ayudas"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+            }
+          >
+            <Package size={20} />
+            Ayudas
           </NavLink>
           
           {user?.rol === 'ADMIN' && (

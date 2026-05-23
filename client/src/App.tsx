@@ -16,6 +16,9 @@ import { AlbergueDetalle } from './pages/Albergues/AlbergueDetalle';
 import { Usuarios } from './pages/Configuracion/Usuarios';
 import { UsuarioForm } from './pages/Configuracion/UsuarioForm';
 import { Alertas } from './pages/Alertas/Alertas';
+import { Ayudas } from './pages/Ayudas/Ayudas';
+import { AyudaForm } from './pages/Ayudas/AyudaForm';
+import { AyudaDetalle } from './pages/Ayudas/AyudaDetalle';
 
 const App: React.FC = () => {
   return (
@@ -39,11 +42,18 @@ const App: React.FC = () => {
               <Route path="/albergues" element={<Albergues />} />
               <Route path="/albergues/:id" element={<AlbergueDetalle />} />
 
+              <Route path="/alertas" element={<Alertas />} />
+
+              <Route path="/ayudas" element={<Ayudas />} />
+              <Route path="/ayudas/:id" element={<AyudaDetalle />} />
+
               <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'OPERADOR']} />}>
                 <Route path="/damnificados/nuevo" element={<DamnificadoForm />} />
                 <Route path="/damnificados/:id/editar" element={<DamnificadoForm />} />
                 <Route path="/albergues/nuevo" element={<AlbergueForm />} />
                 <Route path="/albergues/:id/editar" element={<AlbergueForm />} />
+                <Route path="/ayudas/nuevo" element={<AyudaForm />} />
+                <Route path="/ayudas/:id/editar" element={<AyudaForm />} />
               </Route>
               
               <Route path="/alertas" element={<Alertas />} />
