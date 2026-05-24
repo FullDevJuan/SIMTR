@@ -35,12 +35,14 @@ const setupRealtimeSubscriptions = () => {
 
           try {
             // Guardar log en la tabla alertas
-            const { error: insertError } = await supabase.from("alertas").insert([
-              {
-                mensaje: `Albergue ${nombre} llenó su capacidad máxima (${capacidad_actual}/${capacidad_maxima}). ID: ${id}`,
-                nivel: "critical",
-              },
-            ]);
+            const { error: insertError } = await supabase
+              .from("alertas")
+              .insert([
+                {
+                  mensaje: `Albergue ${nombre} llenó su capacidad máxima (${capacidad_actual}/${capacidad_maxima}). ID: ${id}`,
+                  nivel: "critical",
+                },
+              ]);
 
             if (insertError) {
               console.error(

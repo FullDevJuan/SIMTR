@@ -12,7 +12,7 @@ export const Usuarios: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filtros de auditoría
   const [filterUsuario, setFilterUsuario] = useState("");
   const [filterOperacion, setFilterOperacion] = useState("");
@@ -30,7 +30,7 @@ export const Usuarios: React.FC = () => {
     try {
       const [userData, auditData] = await Promise.all([
         apiFetch<Usuario[]>("/usuarios"),
-        apiFetch<any[]>("/audit")
+        apiFetch<any[]>("/audit"),
       ]);
       setUsuarios(userData);
       setLogs(auditData);
@@ -164,9 +164,14 @@ export const Usuarios: React.FC = () => {
   const filteredLogs = logs
     .filter((log) => {
       const userName = log.usuarios?.nombre_completo || "Sistema / Público";
-      const matchUsuario = userName.toLowerCase().includes(filterUsuario.toLowerCase());
-      const matchOperacion = filterOperacion === "" || log.operacion === filterOperacion;
-      const matchTabla = filterTabla === "" || log.tabla_afectada.toLowerCase().includes(filterTabla.toLowerCase());
+      const matchUsuario = userName
+        .toLowerCase()
+        .includes(filterUsuario.toLowerCase());
+      const matchOperacion =
+        filterOperacion === "" || log.operacion === filterOperacion;
+      const matchTabla =
+        filterTabla === "" ||
+        log.tabla_afectada.toLowerCase().includes(filterTabla.toLowerCase());
       return matchUsuario && matchOperacion && matchTabla;
     })
     .sort((a, b) => {
@@ -196,44 +201,63 @@ export const Usuarios: React.FC = () => {
       )}
 
       <div style={{ marginTop: "3rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
-          <h2 className={styles.title} style={{ fontSize: '1.5rem', margin: 0 }}>Logs de Auditoría</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            marginBottom: "1rem",
+          }}
+        >
+          <h2
+            className={styles.title}
+            style={{ fontSize: "1.5rem", margin: 0 }}
+          >
+            Logs de Auditoría
+          </h2>
         </div>
-        
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            marginBottom: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
           <div style={{ flex: 1, minWidth: "200px" }}>
-            <Input 
-              placeholder="Buscar por usuario..." 
-              value={filterUsuario} 
-              onChange={(e) => setFilterUsuario(e.target.value)} 
+            <Input
+              placeholder="Buscar por usuario..."
+              value={filterUsuario}
+              onChange={(e) => setFilterUsuario(e.target.value)}
             />
           </div>
           <div style={{ flex: 1, minWidth: "150px" }}>
-            <Select 
+            <Select
               value={filterOperacion}
               onChange={(e) => setFilterOperacion(e.target.value)}
               options={[
                 { value: "", label: "Todas las operaciones" },
                 { value: "INSERT", label: "INSERT" },
                 { value: "UPDATE", label: "UPDATE" },
-                { value: "DELETE", label: "DELETE" }
+                { value: "DELETE", label: "DELETE" },
               ]}
             />
           </div>
           <div style={{ flex: 1, minWidth: "200px" }}>
-            <Input 
-              placeholder="Buscar por tabla..." 
-              value={filterTabla} 
-              onChange={(e) => setFilterTabla(e.target.value)} 
+            <Input
+              placeholder="Buscar por tabla..."
+              value={filterTabla}
+              onChange={(e) => setFilterTabla(e.target.value)}
             />
           </div>
           <div style={{ flex: 1, minWidth: "150px" }}>
-            <Select 
+            <Select
               value={sortOrder}
               onChange={(e: any) => setSortOrder(e.target.value)}
               options={[
                 { value: "desc", label: "Más recientes primero" },
-                { value: "asc", label: "Más antiguos primero" }
+                { value: "asc", label: "Más antiguos primero" },
               ]}
             />
           </div>

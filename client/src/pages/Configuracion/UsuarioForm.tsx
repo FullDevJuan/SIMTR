@@ -38,7 +38,7 @@ export const UsuarioForm: React.FC = () => {
         try {
           const [usuarioData, auditData] = await Promise.all([
             apiFetch<Usuario>(`/usuarios/${id}`),
-            apiFetch<any[]>(`/audit?usuario_id=${id}`)
+            apiFetch<any[]>(`/audit?usuario_id=${id}`),
           ]);
 
           reset({
@@ -220,13 +220,18 @@ export const UsuarioForm: React.FC = () => {
 
       {isEdit && (
         <div style={{ marginTop: "3rem" }}>
-          <h2 className={styles.title} style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+          <h2
+            className={styles.title}
+            style={{ fontSize: "1.5rem", marginBottom: "1rem" }}
+          >
             Historial de Acciones del Usuario
           </h2>
           {logs.length > 0 ? (
             <Table columns={logColumns} data={logs} itemsPerPage={5} />
           ) : (
-            <p style={{ color: "var(--color-text-muted)" }}>No hay registros de actividad para este usuario.</p>
+            <p style={{ color: "var(--color-text-muted)" }}>
+              No hay registros de actividad para este usuario.
+            </p>
           )}
         </div>
       )}

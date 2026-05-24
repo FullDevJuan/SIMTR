@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api/client";
+import { supabase } from "../../lib/supabase";
 import type { Albergue, AsignacionAlbergue, Damnificado } from "../../types";
 import { Card } from "../../components/Card/Card";
 import { Button } from "../../components/Button/Button";
@@ -17,33 +18,68 @@ export const AlbergueDetalle: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchDetalle = async () => {
-      try {
-        const albergueData = await apiFetch<Albergue>(`/albergues/${id}`);
-        setAlbergue(albergueData);
+  const fetchDetalle = useCallback(async () => {
+    try {
+      const albergueData = await apiFetch<Albergue>(`/albergues/${id}`);
+      setAlbergue(albergueData);
 
-        const asignacionesData = await apiFetch<AsignacionAlbergue[]>('/asignaciones');
-        const damnificadosData = await apiFetch<Damnificado[]>('/damnificados');
-        
-        const enEsteAlbergue = asignacionesData
-            .filter(a => a.albergue_id === id && !a.fecha_salida)
-            .map(a => {
-              const d = damnificadosData.find(d => d.id === a.damnificado_id);
-              if (d) return { ...d, asignacion_id: a.id! };
-              return null;
-            })
-            .filter(item => item !== null) as (Damnificado & { asignacion_id: string })[];
-            
-        setDamnificadosAsignados(enEsteAlbergue);
-      } catch (err: any) {
-        setErrorMsg("Error al cargar el albergue: " + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDetalle();
+      const asignacionesData = await apiFetch<AsignacionAlbergue[]>('/asignaciones');
+      const damnificadosData = await apiFetch<Damnificado[]>('/damnificados');
+      
+      const enEsteAlbergue = asignacionesData
+          .filter(a => a.albergue_id === id && !a.fecha_salida)
+          .map(a => {
+            const d = damnificadosData.find(d => d.id === a.damnificado_id);
+            if (d) return { ...d, asignacion_id: a.id! };
+            return null;
+          })
+          .filter(item => item !== null) as (Damnificado & { asignacion_id: string })[];
+          
+      setDamnificadosAsignados(enEsteAlbergue);
+    } catch (err: any) {
+      setErrorMsg("Error al cargar el albergue: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchDetalle();
+
+    // -------------------------------------------------------------
+    // Suscripción en Tiempo Real para este Albergue y Asignaciones
+    // -------------------------------------------------------------
+    const token = sessionStorage.getItem("access_token");
+    if (token) {
+      supabase.realtime.setAuth(token);
+    }
+
+    const channel = supabase
+      .channel(`albergue-detalle-${id}`)
+      // Escuchar cambios en la tabla albergues para este ID
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "albergues", filter: `id=eq.${id}` },
+        (payload) => {
+          console.log("[Realtime Detalle] Albergue actualizado:", payload.new);
+          setAlbergue(payload.new as Albergue);
+        }
+      )
+      // Escuchar cambios en la tabla asignaciones_albergue
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "asignaciones_albergue" },
+        (payload) => {
+          console.log("[Realtime Detalle] Asignación cambiada, recargando...", payload);
+          fetchDetalle();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, fetchDetalle]);
 
   if (loading) return <div>Cargando detalles...</div>;
   if (errorMsg) return <div className={styles.errorAlert}>{errorMsg}</div>;
@@ -64,8 +100,8 @@ export const AlbergueDetalle: React.FC = () => {
       const res = await apiFetch<any>(`/asignaciones/${asignacionId}`, { method: 'DELETE' });
       console.log('Respuesta borrado:', res);
       
-      // Forzar recarga de los datos locales para asegurar que la UI se actualiza
-      window.location.reload(); 
+      // Actualizar datos locales sin forzar un reload completo de la pestaña
+      fetchDetalle();
       
     } catch (err: any) {
       console.error('Error al borrar:', err);
