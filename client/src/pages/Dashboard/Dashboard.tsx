@@ -51,7 +51,7 @@ export const Dashboard: React.FC = () => {
       setDamnificados(damnificadosData);
       setAyudas(ayudasData);
 
-      if (user?.rol === "ADMIN" || user?.rol === "OPERADOR") {
+      if (user?.rol === "ADMIN" ) {
         const auditData = await apiFetch<AuditLog[]>("/audit");
         setAuditLogs(auditData.slice(0, 10));
       }
@@ -126,13 +126,13 @@ export const Dashboard: React.FC = () => {
             .catch(console.error);
         },
       )
-      // 4. Escuchar Auditorías (solo si rol administrador u operador para actualizar feed)
+      // 4. Escuchar Auditorías (solo si rol administrador para actualizar feed)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "audit_log" },
         (payload) => {
           console.log("[Realtime DB] Nuevo Log de Auditoría:", payload);
-          if (user?.rol === "ADMIN" || user?.rol === "OPERADOR") {
+          if (user?.rol === "ADMIN" ) {
             // Recargar logs para resolver relaciones del usuario join
             apiFetch<AuditLog[]>("/audit")
               .then((data) => setAuditLogs(data.slice(0, 10)))
@@ -383,7 +383,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Panel Lateral: Auditoría en Tiempo Real */}
-        {(user?.rol === "ADMIN" || user?.rol === "OPERADOR") && (
+        {(user?.rol === "ADMIN" ) && (
           <div className={styles.auditColumn}>
             <div className={styles.auditCard}>
               <div className={styles.auditHeader}>
