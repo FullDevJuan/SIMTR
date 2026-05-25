@@ -12,6 +12,10 @@ export const getAuditLogs = async (req, res) => {
       query = query.eq('usuario_id', req.query.usuario_id);
     }
 
+    if (req.query.tabla_afectada) {
+      query = query.eq('tabla_afectada', req.query.tabla_afectada);
+    }
+
     const { data, error } = await query;
 
     if (error) throw error;

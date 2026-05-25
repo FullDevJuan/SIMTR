@@ -74,8 +74,12 @@ setupRealtimeSubscriptions();
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(
-    `Servidor de SIMTR Backend corriendo en http://localhost:${PORT}`,
-  );
-});
+if (process.argv[1] && (process.argv[1].endsWith("app.js") || process.argv[1].endsWith("app"))) {
+  app.listen(PORT, () => {
+    console.log(
+      `Servidor de SIMTR Backend corriendo en http://localhost:${PORT}`,
+    );
+  });
+}
+
+export default app;
